@@ -44,11 +44,15 @@ Along the way, we tested several approaches:
 - **Classical Solver (GLPK)**: Used `GLPK` in the `pulp` package to get an idea of the optimal MIS for a graph.
 - **QUBO Reformulation**: We reformulated the problem as a QUBO (Quadratic Unconstrained Binary Optimization) problem, making it easier to map onto the NAQC register.
 - **Pulse Optimization**: To align the system's Hamiltonian with our cost function, we optimized pulse parameters based on [this paper](https://arxiv.org/abs/2202.09372). 
-- **Detuning Map Channel**: We tested applying a detuning map where each qubit’s detuning is proportional to the population it covers. Although this didn't improve results, we documented it as part of the process.
+- **Detuning Map Channel**: We tested applying a detuning map where each qubit’s detuning is proportional to the population it covers.
 
 ## Final Solution
 
-Our final approach combines simulated annealing with NAQC’s strength in finding independent sets. Starting from a random grid layout, simulated annealing generates new layouts at each iteration. The NAQC then calculates the MIS for each layout, accelerating what would normally be a slow process. We continue this loop until reaching a target or max number of iterations.
+Our final approach combines simulated annealing with NAQC’s strength in finding independent sets. Starting from a random grid layout, simulated annealing generates new grid layouts at each iteration. The NAQC then calculates the MIS for each layout, accelerating what would normally be a slow process. We continue this loop until reaching a target or max number of iterations.
+
+## Other Approach
+
+To compute the Maximum Weighted Independent Set (MWIS) of a graph, we use the Variational Quantum Annealing Algorithm (VQAA) to optimize individual atom detunings (through a detuning map channel) and global pulse parameters (in the Rydberg global channel). While the algorithm accurately determines the MWIS, we are constrained by the number of atoms we can simulate (up to 12). Consequently, results depend significantly on the initial grid parameters; without pre-optimization, population coverage reflects the quality of this grid. Due to these limitations, this method was not selected as our final solution. However, with the ability to simulate a larger number of atoms (up to 200), this approach could be applied to a finer grid, achieving a well-covered MWIS solution. Alternatively, a fine grid with many points could be divided into 12-atom subdomains, allowing individual optimization within each subdomain and then combining results to cover the entire grid comprehensivel.
 
 ---
 
@@ -66,6 +70,6 @@ The repository includes folders for data and figures, and several notebooks deta
 ### Jupyter Notebook Files
 
 - **`classical_linear_solver.ipynb`**: Classical solution using the GLPK solver from `pulp`.
-- **`pulse_optimization.ipynb`**: Implements the pulse optimization approach from [this paper](https://arxiv.org/abs/2202.09372). Saves optimized pulse parameters in `optimized_values.npz`.
+- **`pulse_optimization.ipynb`**: Implements the pulse optimization approach from [this paper](https://arxiv.org/abs/2202.09372) corresponding to Variational Quantum Adiabatic Algorithm (VQAA). Saves optimized pulse parameters in `optimized_values.npz`.
 - **`main_algorithm.ipynb`**: Contains our **main solution**, detailing the final approach. This notebook generates files in the `figures` folder and the `.gif` in `media`.
 - **`second_algorithm.ipynb`**: Generate a fixed grid using a greedy algorithm. Then using a detuning map and the rydberg chanel, we optimize the parameters to generate the MWIS of the given grid.
